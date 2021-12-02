@@ -3,11 +3,18 @@ import "./Map.css";
 import MapContext from "./MapContext";
 import * as ol from "ol";
 import Draw from 'ol/interaction/Draw';
+import { toLonLat } from 'ol/proj';
 
-const Map = ({ children, zoom, center }) => {
+import { connect } from 'react-redux';
+import { setCoordinate } from '../ActionCreators';
+
+const Map = (props) => {
+	console.log("inside map")
+	console.log(props)
+
 	const mapRef = useRef();
 	const [map, setMap] = useState(null);
-
+	const { zoom, center } = props
 	// on component mount
 	useEffect(() => {
 		let options = {
@@ -22,6 +29,17 @@ const Map = ({ children, zoom, center }) => {
 
 		let mapObject = new ol.Map(options);
 		mapObject.setTarget(mapRef.current);
+
+		mapObject.on('click', (e) => {
+			console.log("clicked!")
+			console.log(toLonLat(e.coordinate));
+			mapObject.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
+				console.log(feature.values_)
+				props.setSelection(feature.values_)
+				props.onClick(e)
+			})
+		})
+
 		setMap(mapObject);
 
 		return () => mapObject.setTarget(undefined);
@@ -44,10 +62,18 @@ const Map = ({ children, zoom, center }) => {
 	return (
 		<MapContext.Provider value={{ map }}>
 			<div ref={mapRef} className="ol-map">
-				{children}
+				{props.children}
 			</div>
 		</MapContext.Provider>
 	)
 }
 
-export default Map;
+
+const mapDispatchToProps = (dispatch) => ({
+	setSelection: (data) => {
+		dispatch(setCoordinate(data));
+	}
+});
+
+
+export default connect(null, mapDispatchToProps)(Map);

@@ -16,10 +16,7 @@ const DataProcess_Worker = function () {
     }
     data.data.forEach((element, index) => {
 
-        // if (index < 50) {
-        console.log(element[18])
-        console.log(element[17])
-        console.log(fromLonLat([element[17], element[18]]))
+
         geoJSON["features"].push({
             "type": "Feature",
             "geometry": { "type": "Point", "coordinates": fromLonLat([element[17], element[18]]) },
@@ -34,7 +31,6 @@ const DataProcess_Worker = function () {
                 "address": element[16]
             }
         });
-        // }
     });
     return geoJSON;
 }
